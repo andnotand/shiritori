@@ -1,0 +1,58 @@
+<html>
+<body>
+    <!--<h1>H1見出しですよ</h1>-->
+    <h1>しりとり</h1>
+    <p id = "previousWord"></p>
+
+    <input id = "nextWordInput" type = "text"/>
+    <button id = "nextWordSendButton">送信</button>
+
+    <script>
+        //alert("Hello JavaScript");
+
+        window.onload = async (event) => {
+            /*await fetch(
+            "/shiritori",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nextWord: "りんご" })
+            }
+        );
+        */
+
+            const response = await fetch("/shiritori", {method: "GET"});//methodを指定して実行
+            
+            const previousWord = await response.text();//結果を取得
+            const paragraph = document.querySelector("#previousWord");//prewordのタグ取得
+            paragraph.innerHTML = `前の単語: ${previousWord}`;
+        }
+
+        document.querySelector("#nextWordSendButton").onclick = async(event) => {
+            const nextWordInput = document.querySelector("#nextWordInput");
+            const nextWordInputText = nextWordInput.value;//↑の中身
+
+            const response = await fetch(
+                "/shiritori",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nextWord: nextWordInputText })
+                }
+            );
+
+            if(response.status !== 200){
+                const errorJson = await response.text();
+                const errorObj = JSON.parse(errorJson);
+                alert(errorObj["errorMessage"]);//statusが200以外の場合にエラーメッセージ
+            }
+
+            const previousWord = await response.text();//responseの内容を取得
+
+            const paragraph = document.querySelector("#previousWord");
+            paragraph.innerHTML = `前の単語: ${previousWord}`;
+            nextWordInput.value = "";
+        }
+    </script>
+</body>
+</html>
